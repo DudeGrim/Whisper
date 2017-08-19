@@ -49,11 +49,9 @@ service firebase.storage {
 <ol>
   <li>Host it locally.</li>
   <li>Host it using Firebase.</li>
-  <ul>
-    <b>Important:</b> Don't forget to replace your Firebase API parameters in index.html as shown below:
-  </ul>
 </ol>
 
+<b>Important:</b> Don't forget to replace your Firebase API parameters in index.html as shown below:
 ```javascript
  // Initialize Firebase Parameters
  var config = {

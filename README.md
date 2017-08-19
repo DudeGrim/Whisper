@@ -51,22 +51,20 @@ service firebase.storage {
   <li>Host it using Firebase.</li>
   <ul>
     <b>Important:</b> Don't forget to replace your Firebase API parameters in index.html as shown below:
-    ```html
-    <script>
-    // Initialize Firebase Parameters
-    var config = {
-      apiKey: "YOUR_API_KEY_HERE",
-      authDomain: "YOUR_DOMAIN_HERE",
-      databaseURL: "YOUR_DATABASE_URL_HERE",
-      projectId: "YOUR_PROJECT_ID_HERE",
-      storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-      messagingSenderId: "YOUR_MESSENGER_ID_HERE"
-    };
-    firebase.initializeApp(config);
-  </script>
-  ```
   </ul>
 </ol>
 
-<h2>Locally</h2>
-I personally use <a href="https://github.com/kzahel/web-server-chrome">Web Server for Chrome</a> to serve the
+```javascript
+ // Initialize Firebase Parameters
+ var config = {
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_DOMAIN_HERE",
+  databaseURL: "YOUR_DATABASE_URL_HERE",
+  projectId: "YOUR_PROJECT_ID_HERE",
+  storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "YOUR_MESSENGER_ID_HERE"
+};
+firebase.initializeApp(config);
+```
+
+

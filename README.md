@@ -5,7 +5,7 @@ A WebVR project made with A-Frame, Google Firebase, and love.
 Whisper uses Google's Firebase for hosting as well as for the storage and database of the whispers.
 
 <h2>How to connect to Firebase</h2>
-You can refer to this <a href="https://firebase.google.com/docs/hosting/deploying">link</a> for a more detailed instruction. 
+You can refer to this <a href="https://firebase.google.com/docs/hosting/deploying">link</a> for a more detailed instruction.
 <ol>
   <li>Create or Login to your Google Firebase Account</li>
   <li>Replace the project config with your own configuration</li>
@@ -16,7 +16,7 @@ You can refer to this <a href="https://firebase.google.com/docs/hosting/deployin
 This is used to store the total number of whispers recorded.
 
 1. Create an entry named: 'whisper_count' and initialize it to 0.
-2. Change the rules because there is no authentication required to use the app. Take note that everyone can read and write in your database as long as they have access to it. 
+2. Change the rules because there is no authentication required to use the app. Take note that everyone can read and write in your database as long as they have access to it.
 
 Click the Rules tab and changed it to the following:
 ```javascript
@@ -29,10 +29,10 @@ Click the Rules tab and changed it to the following:
 ```
 
 <h3>Storage</h3>
-This stores all the whisper in the custom metadata, it contains the location of the whisperer and the number of times that whisper have been heard. 
+This stores all the whisper in the custom metadata, it contains the location of the whisperer and the number of times that whisper have been heard.
 
 1. Create a folder named: 'whispers'.
-2. Change the rules because there is no authentication required to use the app. Take note that everyone can read and write in your storage as long as they have access to it. 
+2. Change the rules because there is no authentication required to use the app. Take note that everyone can read and write in your storage as long as they have access to it.
 
 Click the Rules tab and changed it to the following:
 ```javascript
@@ -49,6 +49,23 @@ service firebase.storage {
 <ol>
   <li>Host it locally.</li>
   <li>Host it using Firebase.</li>
+  <ul>
+    <b>Important:</b> Don't forget to replace your Firebase API parameters in index.html as shown below:
+    ```html
+    <script>
+    // Initialize Firebase Parameters
+    var config = {
+      apiKey: "YOUR_API_KEY_HERE",
+      authDomain: "YOUR_DOMAIN_HERE",
+      databaseURL: "YOUR_DATABASE_URL_HERE",
+      projectId: "YOUR_PROJECT_ID_HERE",
+      storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+      messagingSenderId: "YOUR_MESSENGER_ID_HERE"
+    };
+    firebase.initializeApp(config);
+  </script>
+  ```
+  </ul>
 </ol>
 
 <h2>Locally</h2>

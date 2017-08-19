@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whisper</title>
+  <meta name="description" content="Whisper">
+  <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+
+  <!-- process manager file -->
+  <script src="js/process_manager.js"></script>
+
+  <!-- Various JS Used -->
+  <script src="js/aframe-particle-system-component.min.js"></script>
+  <script src="js/gradientsky.min.js"></script>
+  <script src="js/GLTFLoader.js"></script>
+  <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.10.1/dist/aframe-extras.min.js"></script>
+  <!-- Geography Script -->
+  <script src="https://geoip-db.com/jsonp"></script>
+
+  <!-- Audio recording JS -->
+  <script src="js/audio_record.js"></script>
+
+  <!-- GeoLocation Stuff  -->
+  <script>
+    // Save data to sessionStorage
+    function callback(data) {
+      sessionStorage.setItem('country', data.country_name);
+      sessionStorage.setItem('city', data.city);
+    }
+  </script>
+
+  <!-- Firebase stuff  -->
+  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-app.js"></script>
+
+  <script>
+    // Initialize Firebase Parameters
+    var config = {
+      apiKey: "YOUR_API_KEY_HERE",
+      authDomain: "YOUR_DOMAIN_HERE",
+      databaseURL: "YOUR_DATABASE_URL_HERE",
+      projectId: "YOUR_PROJECT_ID_HERE",
+      storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+      messagingSenderId: "YOUR_MESSENGER_ID_HERE"
+    };
+    firebase.initializeApp(config);
+  </script>
+
+  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-database.js"></script>
+
+
+  <script>
+    //Registers the whisper button
+    AFRAME.registerComponent('record-audio', {
+      init: function() {
+        this.el.addEventListener('click', function(evt) {
+          console.log('Record whisper was clicked');
+          first_step();
+          disable_button();
+
+        });
+      }
+    });
+
+    //Registers the Listen to whisper button
+    AFRAME.registerComponent('listen-audio', {
+      init: function() {
+        this.el.addEventListener('click', function(evt) {
+          console.log('Listen to New Whisper!');
+          listen_to_new_whisper();
+          disable_button();
+        });
+      }
+    });
+    /*Registers a custom glTF model loader because as of the developing of this web app,
+    aframe extras has problems loading glTF files normally*/
+    AFRAME.registerComponent('gltf-model-custom', {
+      schema: {
+        type: 'model'
+      },
+      init: function() {
+        this.model = null;
+        this.loader = new THREE.GLTFLoader();
+        this.loader.setCrossOrigin('Anonymous');
+      },
+      update: function() {
+        var self = this;
+        var el = this.el;
+        var src = this.data;
+        if (!src) {
+          return;
+        }
+        this.remove();
+        this.loader.load(src, function gltfLoaded(gltfModel) {
+          self.model = gltfModel.scene;
+          self.model.animations = gltfModel.animations;
+          el.setObject3D('mesh', self.model);
+          el.emit('model-loaded', {
+            format: 'gltf',
+            model: self.model
+          });
+        });
+      },
+      remove: function() {
+        if (!this.model) {
+          return;
+        }
+        this.el.removeObject3D('mesh');
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <a-scene>
+    <!-- Define Assets -->
+    <a-assets>
+      <a-asset-item id="lantern-gltf" src="assets/LANTERN.gltf"></a-asset-item>
+      <a-asset-item id="water-normal" src="assets/waternormal.jpg" /></a-asset-item>
+      <audio id="ocean-sound" src="assets/Small-waves-sound-effect.mp3"></audio>
+      <audio id="gas-lamp" src="assets/Gas_Lamp_Flickering.mp3"></audio>
+      <audio id="soft-wind" src="assets/Soft_Wind.mp3"></audio>
+      <a-mixin id="lantern" scale="1 1 1" light="type: point; intensity: 0.2"></a-mixin>
+      <a-mixin id="gas-lantern" sound="src: #gas-lamp; autoplay: true; loop:true; volume:1"></a-mixin>
+    </a-assets>
+
+    <!-- The sky. -->
+    <a-sky src="assets/sky_photo4.jpg"></a-sky>
+
+    <!-- A pretty particle system. Basically Asethetics. May cause some lag as the system is pretty heavy on resources. Commented out by default.  -->
+    <a-entity class="not-clickable" position="0 0 0" particle-system="preset: dust; particleCount: 300; color:#FEE31A; size:0.7; duration:null opacity:0.8;"></a-entity>
+
+    <!-- deflaut light settings -->
+    <a-entity light="type: ambient; color: #BBB"></a-entity>
+
+    <!-- The camera -->
+    <a-entity id="player" position="0 1 1.5">
+      <a-light type="point"></a-light>
+      <a-camera wasd-controls-enabled="false" >
+        <a-entity cursor="fuse: true; fuseTimeout: 1000" position="0 0 -1" scale="0.05 0.05 0.05" geometry="primitive: ring; radiusInner: 0.7; radiusOuter: 0.8" material="color: white; shader: flat">
+        <a-animation begin="cursor-fusing" easing="ease-in" attribute="scale" fill="backwards" from="0.05 0.05 0.05" to="0.005 0.005 0.005"></a-animation>
+        </a-entity>
+      </a-camera>
+    </a-entity>
+
+    <!-- The Whisper Button -->
+    <a-plane id="startRecord_button" position="-0.5 1.3 -0.6" record-audio rotation="-35 0 0" color="#FFF" opacity="0.5" width="0.8" height="0.3" text="baseline: center; align:center; width: 3;  lineHeight: 55;  letterSpacing: 3 ; color: black; value:Whisper"></a-plane>
+
+    <!-- The Listen Button -->
+    <a-plane id="listen_button" position="0.5 1.3 -0.6" listen-audio rotation="-35 0 0" color="#FFF" opacity="0.5" width="0.8" height="0.3" text="baseline: center; align:center; width: 3; lineHeight: 55; letterSpacing: 3 ; color: black; value:Listen"></a-plane>
+
+    <!-- Low Poly Ocean -->
+    <a-ocean color="#000C2E" width="100" depth="100" density="100" speed="-0.5" opacity="1.0" amplitude="0.1" sound="src: #ocean-sound; autoplay: true; loop:true; volume:0.05"></a-ocean>
+
+  </a-scene>
+
+
+  <script>
+    //This whole Script generates random lantern pop ups
+    var scene = document.querySelector('a-scene');
+    var num_lantern = 5;
+    var total_lantern_count = 0;
+    var lantern_machine = setInterval(function() {
+      for (i = 0; i < num_lantern; i++) {
+        total_lantern_count++;
+        var new_lantern = document.createElement('a-entity');
+        new_lantern.setAttribute('gltf-model-custom', '#lantern-gltf');
+        new_lantern.setAttribute('mixin', 'lantern gas-lantern');
+        var animation_lantern = document.createElement('a-animation');
+        var duration = Math.floor((Math.random() * 20000) + 7000);
+        var x_coord = Math.floor((Math.random() * 50) - 20);
+        var y_coord = Math.floor((Math.random() * 35) + 10);
+        var z_coord = Math.floor((Math.random() * 50) - 20);
+        var start_coord = x_coord + ' -1 ' + z_coord;
+        var final_coord = x_coord + ' ' + 20 + ' ' + z_coord;
+        animation_lantern.setAttribute('attribute', 'position');
+        animation_lantern.setAttribute('class', 'not-clickable');
+        animation_lantern.setAttribute('dur', duration);
+        animation_lantern.setAttribute('fill', 'forwards');
+        animation_lantern.setAttribute('from', start_coord)
+        animation_lantern.setAttribute('to', final_coord);
+        animation_lantern.setAttribute('repeat', 'indefinite');
+        new_lantern.appendChild(animation_lantern);
+        scene.appendChild(new_lantern);
+        if (total_lantern_count >= 10) {
+          clearInterval(lantern_machine);
+        }
+      }
+    }, 8000);
+  </script>
+</body>
+
+</html>
